@@ -1,0 +1,7 @@
+flask==2.2.3
+flask-admin==1.6.1
+flask-sqlalchemy==3.0.3
+sqlalchemy==2.0.5
+psycopg2-binary==2.9.5
+werkzeug==2.2.3
+wtforms==3.0.1

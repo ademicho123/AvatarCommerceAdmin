@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AvatarCommerce Admin - Login</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-container {
+      width: 100%;
+      max-width: 400px;
+    }
+    .card {
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .card-header {
+      background-color: #3c8dbc;
+      color: white;
+      font-weight: bold;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+    .btn-primary {
+      background-color: #3c8dbc;
+      border-color: #3c8dbc;
+    }
+    .btn-primary:hover {
+      background-color: #367fa9;
+      border-color: #367fa9;
+    }
+    .avatar-logo {
+      max-width: 200px;
+      margin: 0 auto 20px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="text-center mb-4">
+      <h2>AvatarCommerce</h2>
+      <h4>Admin Panel</h4>
+    </div>
+    
+    <div class="card">
+      <div class="card-header">
+        Login
+      </div>
+      <div class="card-body">
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+          {{ error }}
+        </div>
+        {% endif %}
+        
+        <form method="post">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" name="username" required autofocus>
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Login</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
