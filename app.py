@@ -5,16 +5,27 @@ from flask_admin.menu import MenuLink
 from werkzeug.security import check_password_hash
 import os
 from datetime import datetime, timedelta
-
 from models import db, AdminUser, InfluencerModel, FanModel, ChatInteractionModel, AffiliateModel
 from auth import login_required, authenticate_admin
 from dashboard import DashboardView, AnalyticsView
 from views import InfluencerView, FanView, ChatInteractionView, AffiliateView
 from config import Config
+from sqlalchemy import func, desc
+import json
+from dotenv import load_dotenv
+
+
+# Load environment variables from .env file
+load_dotenv()
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 # Create Flask application
 app = Flask(__name__)
 app.config.from_object(Config)
+app.config['FLASK_ADMIN_TEMPLATE_MODE'] = 'bootstrap4'
+app.config['FLASK_ADMIN_TEMPLATES_AUTO_RELOAD'] = True
 
 # Initialize database
 db.init_app(app)
@@ -33,7 +44,64 @@ class MyAdminIndexView(AdminIndexView):
     def index(self):
         if 'admin_user_id' not in session:
             return redirect(url_for('login'))
-        return super(MyAdminIndexView, self).index()
+            
+        # Key metrics
+        influencer_count = InfluencerModel.query.count()
+        fan_count = FanModel.query.count()
+        chat_count = ChatInteractionModel.query.count()
+        product_rec_count = ChatInteractionModel.query.filter_by(product_recommendations=True).count()
+        
+        # Calculate product recommendation rate
+        if chat_count > 0:
+            product_rec_rate = (product_rec_count / chat_count) * 100
+        else:
+            product_rec_rate = 0
+            
+        # Activity over time (last 30 days)
+        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+        daily_chats = db.session.query(
+            func.date(ChatInteractionModel.created_at).label('date'),
+            func.count().label('count')
+        ).filter(ChatInteractionModel.created_at >= thirty_days_ago) \
+         .group_by(func.date(ChatInteractionModel.created_at)) \
+         .order_by(func.date(ChatInteractionModel.created_at)) \
+         .all()
+        
+        # Format for chart
+        dates = [d.date.strftime('%Y-%m-%d') for d in daily_chats]
+        counts = [d.count for d in daily_chats]
+        
+        # Top influencers by chat volume
+        top_influencers = db.session.query(
+            InfluencerModel.username,
+            func.count(ChatInteractionModel.id).label('chat_count')
+        ).join(ChatInteractionModel, InfluencerModel.id == ChatInteractionModel.influencer_id) \
+         .group_by(InfluencerModel.username) \
+         .order_by(desc('chat_count')) \
+         .limit(5) \
+         .all()
+            
+        # Recent activity
+        recent_chats = db.session.query(
+            ChatInteractionModel,
+            InfluencerModel.username.label('influencer_name'),
+            FanModel.username.label('fan_name')
+        ).join(InfluencerModel, ChatInteractionModel.influencer_id == InfluencerModel.id) \
+         .outerjoin(FanModel, ChatInteractionModel.fan_id == FanModel.id) \
+         .order_by(ChatInteractionModel.created_at.desc()) \
+         .limit(10) \
+         .all()
+        
+        return self.render('admin/index.html',
+                          influencer_count=influencer_count,
+                          fan_count=fan_count,
+                          chat_count=chat_count,
+                          product_rec_count=product_rec_count,
+                          product_rec_rate=product_rec_rate,
+                          dates_json=json.dumps(dates),
+                          counts_json=json.dumps(counts),
+                          top_influencers=top_influencers,
+                          recent_chats=recent_chats)
 
 # Initialize Flask-Admin
 admin = Admin(
@@ -44,12 +112,12 @@ admin = Admin(
 )
 
 # Add model views
-admin.add_view(InfluencerView(InfluencerModel, db.session, name='Influencers'))
-admin.add_view(FanView(FanModel, db.session, name='Fans'))
-admin.add_view(ChatInteractionView(ChatInteractionModel, db.session, name='Chat Interactions'))
-admin.add_view(AffiliateView(AffiliateModel, db.session, name='Affiliate Links'))
+admin.add_view(InfluencerView(InfluencerModel, db.session, name='Influencers', endpoint='influencermodel'))
+admin.add_view(FanView(FanModel, db.session, name='Fans', endpoint='fanmodel'))
+admin.add_view(ChatInteractionView(ChatInteractionModel, db.session, name='Chat Interactions', endpoint='chatinteractionmodel'))
+admin.add_view(AffiliateView(AffiliateModel, db.session, name='Affiliate Links', endpoint='affiliatemodel'))
 
-# Add analytics view
+# Add analytics view with explicit endpoint name
 admin.add_view(AnalyticsView(name='Analytics', endpoint='analytics'))
 
 # Add login/logout links
@@ -111,5 +179,5 @@ def init_admin():
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()
-    app.run(debug=True, port=5001)  # Use a different port from your main app
+        db.create_all()  # This creates all tables in the database
+    app.run(debug=True, port=5001)

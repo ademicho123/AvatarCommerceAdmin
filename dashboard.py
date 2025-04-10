@@ -29,8 +29,8 @@ class DashboardView(BaseView):
          .all()
         
         # Format for chart
-        dates = [d.date.strftime('%Y-%m-%d') for d in daily_chats]
-        counts = [d.count for d in daily_chats]
+        dates = [d.date.strftime('%Y-%m-%d') for d in daily_chats] if daily_chats else []
+        counts = [d.count for d in daily_chats] if daily_chats else []
         
         # Top influencers by chat volume
         top_influencers = db.session.query(

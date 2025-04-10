@@ -5,7 +5,8 @@
     ├── models.py               # Admin models mapping to database
     ├── views.py                # Admin views for data management
     ├── config.py               # Admin app configuration
-    ├── templates/              # Custom templates
+    ├── templates/
+        --Admin          # Custom templates
     │       ├── index.html      # Dashboard template
     │   │   ├── analytics.html  # Analytics template
     │   │   └── login.html      # Login template

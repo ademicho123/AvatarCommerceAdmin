@@ -1,5 +1,8 @@
 {% extends 'master.html' %}
 
+{% block title %}Analytics - AvatarCommerce Admin{% endblock %}
+{% block page_title %}Analytics{% endblock %}
+
 {% block head_css %}
   {{ super() }}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css">
@@ -8,16 +11,35 @@
       border-radius: 4px;
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
       margin-bottom: 20px;
-      padding: 15px;
+      padding: 20px;
       background-color: white;
     }
     .metric-card {
       text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+    .metric-card:hover {
+      transform: translateY(-5px);
+    }
+    .metric-card .icon {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 36px;
+      opacity: 0.1;
     }
     .metric-value {
       font-size: 28px;
       font-weight: bold;
       margin: 10px 0;
+    }
+    .metric-label {
+      text-transform: uppercase;
+      color: #6c757d;
+      font-size: 14px;
+      font-weight: 500;
     }
     .metric-trend {
       font-size: 14px;
@@ -37,7 +59,7 @@
       height: 250px;
     }
     .chart-title {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 500;
       margin-bottom: 15px;
     }
@@ -45,33 +67,40 @@
 {% endblock %}
 
 {% block body %}
-  <h1>Analytics</h1>
-  
   <div class="row">
     <!-- Today's Summary -->
-    <div class="col-md-3">
-      <div class="analytics-card metric-card">
-        <div class="text-muted">New Influencers Today</div>
+    <div class="col-xl-3 col-md-6">
+      <div class="analytics-card metric-card" style="border-left: 4px solid #007bff;">
+        <div class="icon">
+          <i class="fas fa-user-plus text-primary"></i>
+        </div>
+        <div class="metric-label">New Influencers Today</div>
         <div class="metric-value">{{ new_influencers_today }}</div>
       </div>
     </div>
     
-    <div class="col-md-3">
-      <div class="analytics-card metric-card">
-        <div class="text-muted">New Fans Today</div>
+    <div class="col-xl-3 col-md-6">
+      <div class="analytics-card metric-card" style="border-left: 4px solid #28a745;">
+        <div class="icon">
+          <i class="fas fa-user-friends text-success"></i>
+        </div>
+        <div class="metric-label">New Fans Today</div>
         <div class="metric-value">{{ new_fans_today }}</div>
       </div>
     </div>
     
-    <div class="col-md-3">
-      <div class="analytics-card metric-card">
-        <div class="text-muted">Chats Today</div>
+    <div class="col-xl-3 col-md-6">
+      <div class="analytics-card metric-card" style="border-left: 4px solid #fd7e14;">
+        <div class="icon">
+          <i class="fas fa-comments text-warning"></i>
+        </div>
+        <div class="metric-label">Chats Today</div>
         <div class="metric-value">{{ chats_today }}</div>
         <div class="metric-trend {% if chats_growth > 0 %}trend-up{% elif chats_growth < 0 %}trend-down{% endif %}">
           {% if chats_growth > 0 %}
-            <i class="fa fa-arrow-up"></i> {{ "%.1f"|format(chats_growth) }}% vs. yesterday
+            <i class="fas fa-arrow-up"></i> {{ "%.1f"|format(chats_growth) }}% vs. yesterday
           {% elif chats_growth < 0 %}
-            <i class="fa fa-arrow-down"></i> {{ "%.1f"|format(chats_growth|abs) }}% vs. yesterday
+            <i class="fas fa-arrow-down"></i> {{ "%.1f"|format(chats_growth|abs) }}% vs. yesterday
           {% else %}
             No change vs. yesterday
           {% endif %}
@@ -79,9 +108,12 @@
       </div>
     </div>
     
-    <div class="col-md-3">
-      <div class="analytics-card metric-card">
-        <div class="text-muted">Product Recommendations Today</div>
+    <div class="col-xl-3 col-md-6">
+      <div class="analytics-card metric-card" style="border-left: 4px solid #dc3545;">
+        <div class="icon">
+          <i class="fas fa-shopping-bag text-danger"></i>
+        </div>
+        <div class="metric-label">Product Recommendations Today</div>
         <div class="metric-value">{{ product_recs_today }}</div>
         {% if chats_today > 0 %}
         <div class="metric-trend">{{ "%.1f"|format(product_recs_today / chats_today * 100) }}% conversion rate</div>
@@ -92,7 +124,7 @@
   
   <div class="row">
     <!-- Monthly Trend Chart -->
-    <div class="col-md-8">
+    <div class="col-lg-8">
       <div class="analytics-card">
         <div class="chart-title">30-Day Activity Trend</div>
         <div class="chart-container">
@@ -102,15 +134,15 @@
     </div>
     
     <!-- Active Users -->
-    <div class="col-md-4">
+    <div class="col-lg-4">
       <div class="analytics-card">
         <div class="chart-title">Active Users (Last 7 Days)</div>
         <div class="chart-container-sm">
           <canvas id="activeUsersChart"></canvas>
         </div>
-        <div class="text-center mt-2">
-          <div><strong>{{ active_influencers }}</strong> active influencers</div>
-          <div><strong>{{ active_fans }}</strong> active fans</div>
+        <div class="text-center mt-3">
+          <div class="badge badge-primary p-2 mb-2"><i class="fas fa-user-circle mr-1"></i> <strong>{{ active_influencers }}</strong> active influencers</div>
+          <div class="badge badge-info p-2"><i class="fas fa-users mr-1"></i> <strong>{{ active_fans }}</strong> active fans</div>
         </div>
       </div>
     </div>
@@ -118,7 +150,7 @@
   
   <div class="row">
     <!-- Platform Distribution -->
-    <div class="col-md-6">
+    <div class="col-lg-6">
       <div class="analytics-card">
         <div class="chart-title">Affiliate Platform Distribution</div>
         <div class="chart-container-sm">
@@ -128,7 +160,7 @@
     </div>
     
     <!-- Conversion Rate Analysis -->
-    <div class="col-md-6">
+    <div class="col-lg-6">
       <div class="analytics-card">
         <div class="chart-title">Conversion Rate Analysis</div>
         <div class="chart-container-sm">
@@ -190,6 +222,11 @@
         tooltips: {
           mode: 'index',
           intersect: false
+        },
+        elements: {
+          line: {
+            tension: 0.4
+          }
         }
       }
     });
@@ -204,11 +241,11 @@
           data: [{{ active_influencers }}, {{ active_fans }}],
           backgroundColor: [
             'rgba(54, 162, 235, 0.8)',
-            'rgba(255, 206, 86, 0.8)'
+            'rgba(75, 192, 192, 0.8)'
           ],
           borderColor: [
             'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)'
+            'rgba(75, 192, 192, 1)'
           ],
           borderWidth: 1
         }]
@@ -218,6 +255,10 @@
         maintainAspectRatio: false,
         legend: {
           position: 'bottom'
+        },
+        cutoutPercentage: 70,
+        animation: {
+          animateScale: true
         }
       }
     });
@@ -245,11 +286,14 @@
         maintainAspectRatio: false,
         legend: {
           position: 'bottom'
+        },
+        animation: {
+          animateScale: true
         }
       }
     });
     
-    // Conversion Rate Chart (example data - would need actual data for this)
+    // Conversion Rate Chart
     var conversionData = [];
     {% for i in range(0, dates_json|length) %}
       {% if chat_counts_json[i] > 0 and product_counts_json[i] > 0 %}

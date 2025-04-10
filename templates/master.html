@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Avatar Commerce Admin{% endblock %}</title>
+  {% block head_css %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f8f9fa;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      padding: 48px 0 0;
+      box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+      background-color: #343a40;
+      width: 250px;
+    }
+    .sidebar-sticky {
+      position: relative;
+      top: 0;
+      height: calc(100vh - 48px);
+      padding-top: .5rem;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+    .sidebar .nav-link {
+      font-weight: 500;
+      color: rgba(255, 255, 255, .75);
+      padding: .75rem 1rem;
+    }
+    .sidebar .nav-link:hover {
+      color: #fff;
+      background-color: rgba(255, 255, 255, .1);
+    }
+    .sidebar .nav-link.active {
+      color: #fff;
+      background-color: rgba(255, 255, 255, .2);
+    }
+    .sidebar .nav-link i {
+      margin-right: 10px;
+    }
+    .sidebar-heading {
+      font-size: .75rem;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, .5);
+      padding: 1rem;
+    }
+    .logo-text {
+      color: white;
+      font-size: 1.2rem;
+      font-weight: bold;
+      padding: 1rem;
+      display: block;
+      text-align: center;
+      margin-top: -40px;
+      margin-bottom: 20px;
+    }
+    .main-content {
+      margin-left: 250px;
+      padding: 1.5rem;
+    }
+    .user-dropdown {
+      color: white;
+      margin-right: 15px;
+    }
+    .header {
+      background-color: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      border-radius: 4px;
+    }
+    .page-title {
+      margin-bottom: 0;
+      font-weight: 500;
+    }
+    .breadcrumb {
+      background-color: transparent;
+      padding: 0;
+      margin-bottom: 0;
+    }
+    .dropdown-menu {
+      right: 0;
+      left: auto;
+    }
+    .card {
+      border: none;
+      border-radius: 4px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, .1);
+      margin-bottom: 1.5rem;
+    }
+    .card-header {
+      background-color: white;
+      border-bottom: 1px solid rgba(0, 0, 0, .125);
+      font-weight: 500;
+    }
+  </style>
+  {% endblock %}
+</head>
+<body>
+  <!-- Sidebar -->
+  {% if session.get('admin_user_id') %}
+  <nav class="sidebar">
+    <div class="sidebar-sticky">
+      <div class="logo-text">Avatar Commerce</div>
+      
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'admin.index' %}active{% endif %}" href="{{ url_for('admin.index') }}">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if 'influencermodel' in request.endpoint %}active{% endif %}" href="{{ url_for('influencermodel.index_view') }}">
+            <i class="fas fa-user-circle"></i> Influencers
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if 'fanmodel' in request.endpoint %}active{% endif %}" href="{{ url_for('fanmodel.index_view') }}">
+            <i class="fas fa-users"></i> Fans
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if 'chatinteractionmodel' in request.endpoint %}active{% endif %}" href="{{ url_for('chatinteractionmodel.index_view') }}">
+            <i class="fas fa-comment-dots"></i> Chat Interactions
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if 'affiliatemodel' in request.endpoint %}active{% endif %}" href="{{ url_for('affiliatemodel.index_view') }}">
+            <i class="fas fa-link"></i> Affiliate Links
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'analytics.index' %}active{% endif %}" href="{{ url_for('analytics.index') }}">
+            <i class="fas fa-chart-bar"></i> Analytics
+          </a>
+        </li>
+      </ul>
+
+      <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+        <span>System</span>
+      </h6>
+      <ul class="nav flex-column mb-2">
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('logout') }}">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  {% endif %}
+
+  <!-- Main Content -->
+  <main class="{% if session.get('admin_user_id') %}main-content{% else %}container mt-5{% endif %}">
+    {% if session.get('admin_user_id') %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center header">
+      <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+      <div class="dropdown">
+        <a class="user-dropdown dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-user-circle"></i> {{ session.get('admin_username', 'Admin') }}
+        </a>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+          <a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    
+    {% block body %}{% endblock %}
+  </main>
+
+  {% block tail_js %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/js/bootstrap.bundle.min.js"></script>
+  {% endblock %}
+</body>
+</html>

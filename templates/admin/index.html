@@ -1,0 +1,295 @@
+{% extends 'master.html' %}
+
+{% block title %}Dashboard - AvatarCommerce Admin{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block head_css %}
+  {{ super() }}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css">
+  <style>
+    .stat-card {
+      border-radius: 4px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      padding: 20px;
+      background-color: white;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+    .stat-card .icon {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 48px;
+      opacity: 0.2;
+    }
+    .stat-value {
+      font-size: 36px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    .stat-label {
+      text-transform: uppercase;
+      color: #6c757d;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .stat-trend {
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    .trend-up {
+      color: #28a745;
+    }
+    .trend-down {
+      color: #dc3545;
+    }
+    .chart-container {
+      position: relative;
+      height: 300px;
+      background-color: white;
+      padding: 20px;
+      border-radius: 4px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .chart-title {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 15px;
+    }
+    .influencer-card {
+      background-color: white;
+      border-radius: 4px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    .activity-card {
+      background-color: white;
+      border-radius: 4px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    .table-responsive {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .influencer-rank {
+      font-weight: bold;
+      width: 30px;
+      height: 30px;
+      line-height: 30px;
+      text-align: center;
+      border-radius: 50%;
+      background-color: #f8f9fa;
+      display: inline-block;
+      margin-right: 10px;
+    }
+    .badge-yes {
+      background-color: #28a745;
+      color: white;
+    }
+    .badge-no {
+      background-color: #6c757d;
+      color: white;
+    }
+    .recent-activity-table img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    .influencer-card, .activity-card {
+      height: 100%;
+    }
+  </style>
+{% endblock %}
+
+{% block body %}
+  <!-- Key Metrics -->
+  <div class="row">
+    <div class="col-xl-3 col-md-6">
+      <div class="stat-card" style="border-left: 4px solid #007bff;">
+        <div class="icon">
+          <i class="fas fa-user-circle text-primary"></i>
+        </div>
+        <div class="stat-label">Total Influencers</div>
+        <div class="stat-value">{{ influencer_count }}</div>
+        <div class="stat-trend">
+          <i class="fas fa-arrow-up text-success"></i> 12% this month
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="stat-card" style="border-left: 4px solid #28a745;">
+        <div class="icon">
+          <i class="fas fa-users text-success"></i>
+        </div>
+        <div class="stat-label">Total Fans</div>
+        <div class="stat-value">{{ fan_count }}</div>
+        <div class="stat-trend">
+          <i class="fas fa-arrow-up text-success"></i> 8% this month
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="stat-card" style="border-left: 4px solid #fd7e14;">
+        <div class="icon">
+          <i class="fas fa-comment-dots text-warning"></i>
+        </div>
+        <div class="stat-label">Chat Interactions</div>
+        <div class="stat-value">{{ chat_count }}</div>
+        <div class="stat-trend">
+          <i class="fas fa-arrow-up text-success"></i> 15% this week
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="stat-card" style="border-left: 4px solid #dc3545;">
+        <div class="icon">
+          <i class="fas fa-shopping-cart text-danger"></i>
+        </div>
+        <div class="stat-label">Product Recommendations</div>
+        <div class="stat-value">{{ product_rec_count }}</div>
+        <div class="stat-trend">
+          {{ "%.1f"|format(product_rec_rate) }}% conversion rate
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row mt-4">
+    <!-- Activity Chart -->
+    <div class="col-lg-8">
+      <div class="chart-container mb-4">
+        <h5 class="chart-title">Chat Activity (Last 30 Days)</h5>
+        <canvas id="activityChart"></canvas>
+      </div>
+    </div>
+    
+    <!-- Top Influencers -->
+    <div class="col-lg-4">
+      <div class="influencer-card mb-4">
+        <h5 class="chart-title">Top Influencers</h5>
+        <div class="list-group list-group-flush">
+          {% for influencer in top_influencers %}
+          <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 py-3">
+            <div>
+              <span class="influencer-rank">{{ loop.index }}</span>
+              <span>{{ influencer.username }}</span>
+            </div>
+            <span class="badge badge-primary badge-pill">{{ influencer.chat_count }} chats</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Recent Activity -->
+  <div class="row">
+    <div class="col-12">
+      <div class="activity-card">
+        <h5 class="chart-title">Recent Chat Activity</h5>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Influencer</th>
+                <th>Fan</th>
+                <th>Message</th>
+                <th>Product Rec</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for chat, influencer_name, fan_name in recent_chats %}
+              <tr>
+                <td>{{ chat.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                  <strong>{{ influencer_name }}</strong>
+                </td>
+                <td>{{ fan_name or 'Anonymous' }}</td>
+                <td>{{ chat.user_message[:50] + '...' if chat.user_message|length > 50 else chat.user_message }}</td>
+                <td>
+                  {% if chat.product_recommendations %}
+                  <span class="badge badge-yes">Yes</span>
+                  {% else %}
+                  <span class="badge badge-no">No</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block tail_js %}
+  {{ super() }}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+  <script>
+    // Chart for Daily Chat Activity
+    var ctx = document.getElementById('activityChart').getContext('2d');
+    var activityChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: {{ dates_json|safe }},
+        datasets: [{
+          label: 'Chat Interactions',
+          data: {{ counts_json|safe }},
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 2,
+          pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+          pointRadius: 3,
+          pointHoverRadius: 5,
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          xAxes: [{
+            gridLines: {
+              display: false
+            },
+            ticks: {
+              maxTicksLimit: 10
+            }
+          }],
+          yAxes: [{
+            ticks: {
+              beginAtZero: true,
+              precision: 0
+            }
+          }]
+        },
+        tooltips: {
+          mode: 'index',
+          intersect: false
+        },
+        hover: {
+          mode: 'nearest',
+          intersect: true
+        },
+        legend: {
+          display: false
+        },
+        elements: {
+          line: {
+            tension: 0.4
+          }
+        }
+      }
+    });
+  </script>
+{% endblock %}

@@ -72,7 +72,7 @@ class ChatInteractionModel(db.Model):
     created_at = db.Column(db.DateTime)
     
     influencer = db.relationship('InfluencerModel', back_populates='chat_interactions')
-    fan = db.relationship('FanModel', back_populates='chat_interactions', nullable=True)
+    fan = db.relationship('FanModel', back_populates='chat_interactions')
     
     def __repr__(self):
         return f'<ChatInteraction {self.id}>'

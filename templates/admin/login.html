@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AvatarCommerce Admin - Login</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Roboto', sans-serif;
+    }
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+    }
+    .card {
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      overflow: hidden;
+      border: none;
+    }
+    .card-header {
+      background-color: #343a40;
+      color: white;
+      font-weight: bold;
+      border-bottom: none;
+      padding: 25px 20px;
+      text-align: center;
+    }
+    .brand-logo {
+      margin-bottom: 15px;
+      font-size: 28px;
+    }
+    .card-body {
+      padding: 30px;
+    }
+    .form-group label {
+      font-weight: 500;
+      color: #495057;
+    }
+    .form-control {
+      border-radius: 4px;
+      padding: 12px 15px;
+      height: auto;
+      border: 1px solid #ced4da;
+    }
+    .form-control:focus {
+      box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 0.25);
+      border-color: #343a40;
+    }
+    .btn-primary {
+      background-color: #343a40;
+      border-color: #343a40;
+      padding: 12px;
+      font-weight: 500;
+      border-radius: 4px;
+    }
+    .btn-primary:hover {
+      background-color: #23272b;
+      border-color: #23272b;
+    }
+    .btn-primary:focus {
+      box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 0.5);
+    }
+    .alert {
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="card">
+      <div class="card-header">
+        <div class="brand-logo">
+          <i class="fas fa-user-circle"></i>
+        </div>
+        <h3>AvatarCommerce</h3>
+        <p class="mb-0">Admin Panel</p>
+      </div>
+      <div class="card-body">
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+          <i class="fas fa-exclamation-circle mr-2"></i> {{ error }}
+        </div>
+        {% endif %}
+        
+        <form method="post">
+          <div class="form-group">
+            <label for="username">
+              <i class="fas fa-user mr-2"></i>Username
+            </label>
+            <input type="text" class="form-control" id="username" name="username" required autofocus>
+          </div>
+          <div class="form-group">
+            <label for="password">
+              <i class="fas fa-lock mr-2"></i>Password
+            </label>
+            <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block mt-4">
+            <i class="fas fa-sign-in-alt mr-2"></i>Login
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
