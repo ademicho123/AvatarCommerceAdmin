@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if fan %}Edit Fan{% else %}New Fan{% endif %} - AvatarCommerce Admin
+{% endblock %}
+
+{% block styles %}
+<style>
+  .form-container {
+    max-width: 600px;
+  }
+  .required-field::after {
+    content: " *";
+    color: red;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>{% if fan %}Edit Fan{% else %}New Fan{% endif %}</h2>
+  <a href="{{ url_for('fans') }}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left"></i> Back to Fans
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="form-container">
+      <form method="POST">
+        <div class="mb-3">
+          <label for="username" class="form-label required-field">Username</label>
+          <input type="text" class="form-control" id="username" name="username" value="{{ fan.username if fan else '' }}" required>
+        </div>
+        
+        <div class="mb-3">
+          <label for="email" class="form-label required-field">Email</label>
+          <input type="email" class="form-control" id="email" name="email" value="{{ fan.email if fan else '' }}" required>
+        </div>
+        
+        <div class="mt-4">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> 
+            {% if fan %}Update{% else %}Create{% endif %} Fan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Focus on username field when page loads
+    document.getElementById('username').focus();
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      
+      if (!username) {
+        alert('Username is required');
+        event.preventDefault();
+        return;
+      }
+      
+      if (!email) {
+        alert('Email is required');
+        event.preventDefault();
+        return;
+      }
+    });
+  });
+</script>
+{% endblock %}

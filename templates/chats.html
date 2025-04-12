@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Chat Interactions - AvatarCommerce Admin{% endblock %}
+
+{% block styles %}
+<style>
+  .message-cell {
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .search-bar {
+    max-width: 400px;
+  }
+  .product-badge {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Chat Interactions</h2>
+</div>
+
+<!-- Search and filters -->
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="search-bar">
+          <input type="text" id="searchInput" class="form-control" placeholder="Search chats...">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chats Table -->
+<div class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover" id="chatsTable">
+        <thead>
+          <tr>
+            <th>Influencer</th>
+            <th>Fan</th>
+            <th>Message</th>
+            <th>Product Rec.</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for chat, influencer_name, fan_name in chats %}
+          <tr>
+            <td>{{ influencer_name }}</td>
+            <td>{{ fan_name or 'Anonymous' }}</td>
+            <td class="message-cell">{{ chat.user_message }}</td>
+            <td>
+              {% if chat.product_recommendations %}
+              <span class="badge bg-success product-badge">Yes</span>
+              {% else %}
+              <span class="badge bg-secondary product-badge">No</span>
+              {% endif %}
+            </td>
+            <td>{{ chat.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Chat Details Modal -->
+<div class="modal fade" id="chatModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Chat Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <h6>User Message</h6>
+          <div class="p-3 bg-light rounded" id="userMessage"></div>
+        </div>
+        <div>
+          <h6>Bot Response</h6>
+          <div class="p-3 bg-light rounded" id="botResponse"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const table = document.getElementById('chatsTable');
+    const rows = table.getElementsByTagName('tr');
+    
+    searchInput.addEventListener('keyup', function() {
+      const query = searchInput.value.toLowerCase();
+      
+      for (let i = 1; i < rows.length; i++) {
+        const influencer = rows[i].cells[0].textContent.toLowerCase();
+        const fan = rows[i].cells[1].textContent.toLowerCase();
+        const message = rows[i].cells[2].textContent.toLowerCase();
+        
+        if (influencer.includes(query) || fan.includes(query) || message.includes(query)) {
+          rows[i].style.display = '';
+        } else {
+          rows[i].style.display = 'none';
+        }
+      }
+    });
+    
+    // View chat details
+    const messageRows = document.querySelectorAll('tr');
+    messageRows.forEach(row => {
+      if (row.cells && row.cells.length > 0) {
+        row.addEventListener('click', function() {
+          // In a real implementation, you would fetch the full chat details
+          // For now, we'll just use the data we have
+          const message = this.cells[2].textContent;
+          
+          // For demonstration, we'll generate a mock bot response
+          const botResponse = "This is a simulated bot response. In a real implementation, you would fetch the actual response from the database.";
+          
+          document.getElementById('userMessage').textContent = message;
+          document.getElementById('botResponse').textContent = botResponse;
+          
+          const chatModal = new bootstrap.Modal(document.getElementById('chatModal'));
+          chatModal.show();
+        });
+      }
+    });
+  });
+</script>
+{% endblock %}

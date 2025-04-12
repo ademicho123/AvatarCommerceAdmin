@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Fans - AvatarCommerce Admin{% endblock %}
+
+{% block styles %}
+<style>
+  .table-actions {
+    width: 150px;
+  }
+  .search-bar {
+    max-width: 400px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Fans</h2>
+  <a href="{{ url_for('new_fan') }}" class="btn btn-primary">
+    <i class="fas fa-plus"></i> New Fan
+  </a>
+</div>
+
+<!-- Search and filters -->
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="search-bar">
+          <input type="text" id="searchInput" class="form-control" placeholder="Search fans...">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Fans Table -->
+<div class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover" id="fansTable">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for fan in fans %}
+          <tr>
+            <td>{{ fan.username }}</td>
+            <td>{{ fan.email }}</td>
+            <td>{{ fan.created_at.strftime('%Y-%m-%d') }}</td>
+            <td class="table-actions">
+              <a href="{{ url_for('edit_fan', id=fan.id) }}" class="btn btn-sm btn-info">
+                <i class="fas fa-edit"></i>
+              </a>
+              <button class="btn btn-sm btn-danger delete-btn" data-id="{{ fan.id }}" data-name="{{ fan.username }}">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete <span id="deleteFanName"></span>?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form id="deleteForm" method="POST">
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const table = document.getElementById('fansTable');
+    const rows = table.getElementsByTagName('tr');
+    
+    searchInput.addEventListener('keyup', function() {
+      const query = searchInput.value.toLowerCase();
+      
+      for (let i = 1; i < rows.length; i++) {
+        const username = rows[i].cells[0].textContent.toLowerCase();
+        const email = rows[i].cells[1].textContent.toLowerCase();
+        
+        if (username.includes(query) || email.includes(query)) {
+          rows[i].style.display = '';
+        } else {
+          rows[i].style.display = 'none';
+        }
+      }
+    });
+    
+    // Delete confirmation
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+    const deleteForm = document.getElementById('deleteForm');
+    const deleteFanName = document.getElementById('deleteFanName');
+    
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const id = this.getAttribute('data-id');
+        const name = this.getAttribute('data-name');
+        
+        deleteFanName.textContent = name;
+        deleteForm.action = '/fans/delete/' + id;
+        
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        deleteModal.show();
+      });
+    });
+  });
+</script>
+{% endblock %}

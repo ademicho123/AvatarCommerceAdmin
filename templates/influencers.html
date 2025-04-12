@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Influencers - AvatarCommerce Admin{% endblock %}
+
+{% block styles %}
+<style>
+  .table-actions {
+    width: 150px;
+  }
+  .table img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+  .search-bar {
+    max-width: 400px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Influencers</h2>
+  <a href="{{ url_for('new_influencer') }}" class="btn btn-primary">
+    <i class="fas fa-plus"></i> New Influencer
+  </a>
+</div>
+
+<!-- Search and filters -->
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="search-bar">
+          <input type="text" id="searchInput" class="form-control" placeholder="Search influencers...">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Influencers Table -->
+<div class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover" id="influencersTable">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for influencer in influencers %}
+          <tr>
+            <td>{{ influencer.username }}</td>
+            <td>{{ influencer.email }}</td>
+            <td>{{ influencer.created_at.strftime('%Y-%m-%d') }}</td>
+            <td class="table-actions">
+              <a href="{{ url_for('edit_influencer', id=influencer.id) }}" class="btn btn-sm btn-info">
+                <i class="fas fa-edit"></i>
+              </a>
+              <button class="btn btn-sm btn-danger delete-btn" data-id="{{ influencer.id }}" data-name="{{ influencer.username }}">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete <span id="deleteInfluencerName"></span>?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form id="deleteForm" method="POST">
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const table = document.getElementById('influencersTable');
+    const rows = table.getElementsByTagName('tr');
+    
+    searchInput.addEventListener('keyup', function() {
+      const query = searchInput.value.toLowerCase();
+      
+      for (let i = 1; i < rows.length; i++) {
+        const username = rows[i].cells[0].textContent.toLowerCase();
+        const email = rows[i].cells[1].textContent.toLowerCase();
+        
+        if (username.includes(query) || email.includes(query)) {
+          rows[i].style.display = '';
+        } else {
+          rows[i].style.display = 'none';
+        }
+      }
+    });
+    
+    // Delete confirmation
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+    const deleteForm = document.getElementById('deleteForm');
+    const deleteInfluencerName = document.getElementById('deleteInfluencerName');
+    
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const id = this.getAttribute('data-id');
+        const name = this.getAttribute('data-name');
+        
+        deleteInfluencerName.textContent = name;
+        deleteForm.action = '/influencers/delete/' + id;
+        
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        deleteModal.show();
+      });
+    });
+  });
+</script>
+{% endblock %}

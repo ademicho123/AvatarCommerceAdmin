@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if affiliate %}Edit Affiliate Link{% else %}New Affiliate Link{% endif %} - AvatarCommerce Admin
+{% endblock %}
+
+{% block styles %}
+<style>
+  .form-container {
+    max-width: 600px;
+  }
+  .required-field::after {
+    content: " *";
+    color: red;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>{% if affiliate %}Edit Affiliate Link{% else %}New Affiliate Link{% endif %}</h2>
+  <a href="{{ url_for('affiliates') }}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left"></i> Back to Affiliate Links
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="form-container">
+      <form method="POST">
+        <div class="mb-3">
+          <label for="influencer_id" class="form-label required-field">Influencer</label>
+          <select class="form-select" id="influencer_id" name="influencer_id" required>
+            <option value="">Select Influencer</option>
+            {% for influencer in influencers %}
+            <option value="{{ influencer.id }}" {% if affiliate and affiliate.influencer_id == influencer.id %}selected{% endif %}>
+              {{ influencer.username }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="mb-3">
+          <label for="platform" class="form-label required-field">Platform</label>
+          <select class="form-select" id="platform" name="platform" required>
+            <option value="">Select Platform</option>
+            <option value="amazon" {% if affiliate and affiliate.platform == 'amazon' %}selected{% endif %}>Amazon</option>
+            <option value="shopify" {% if affiliate and affiliate.platform == 'shopify' %}selected{% endif %}>Shopify</option>
+            <option value="etsy" {% if affiliate and affiliate.platform == 'etsy' %}selected{% endif %}>Etsy</option>
+            <option value="ebay" {% if affiliate and affiliate.platform == 'ebay' %}selected{% endif %}>eBay</option>
+            <option value="instagram" {% if affiliate and affiliate.platform == 'instagram' %}selected{% endif %}>Instagram</option>
+            <option value="tiktok" {% if affiliate and affiliate.platform == 'tiktok' %}selected{% endif %}>TikTok</option>
+            <option value="youtube" {% if affiliate and affiliate.platform == 'youtube' %}selected{% endif %}>YouTube</option>
+            <option value="other" {% if affiliate and affiliate.platform == 'other' %}selected{% endif %}>Other</option>
+          </select>
+        </div>
+        
+        <div class="mb-3">
+          <label for="affiliate_id" class="form-label required-field">Affiliate ID</label>
+          <input type="text" class="form-control" id="affiliate_id" name="affiliate_id" value="{{ affiliate.affiliate_id if affiliate else '' }}" required>
+        </div>
+        
+        <div class="mt-4">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> 
+            {% if affiliate %}Update{% else %}Create{% endif %} Affiliate Link
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+      const influencerId = document.getElementById('influencer_id').value;
+      const platform = document.getElementById('platform').value;
+      const affiliateId = document.getElementById('affiliate_id').value.trim();
+      
+      if (!influencerId) {
+        alert('Please select an influencer');
+        event.preventDefault();
+        return;
+      }
+      
+      if (!platform) {
+        alert('Please select a platform');
+        event.preventDefault();
+        return;
+      }
+      
+      if (!affiliateId) {
+        alert('Affiliate ID is required');
+        event.preventDefault();
+        return;
+      }
+    });
+  });
+</script>
+{% endblock %}

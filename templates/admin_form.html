@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if admin %}Edit Admin User{% else %}New Admin User{% endif %} - AvatarCommerce Admin
+{% endblock %}
+
+{% block styles %}
+<style>
+  .form-container {
+    max-width: 600px;
+  }
+  .required-field::after {
+    content: " *";
+    color: red;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>{% if admin %}Edit Admin User{% else %}New Admin User{% endif %}</h2>
+  <a href="{{ url_for('admin_users') }}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left"></i> Back to Admin Users
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="form-container">
+      <form method="POST">
+        <div class="mb-3">
+          <label for="username" class="form-label required-field">Username</label>
+          <input type="text" class="form-control" id="username" name="username" value="{{ admin.username if admin else '' }}" required>
+        </div>
+        
+        <div class="mb-3">
+          <label for="email" class="form-label required-field">Email</label>
+          <input type="email" class="form-control" id="email" name="email" value="{{ admin.email if admin else '' }}" required>
+        </div>
+        
+        <div class="mb-3">
+          <label for="password" class="form-label {% if not admin %}required-field{% endif %}">Password</label>
+          <input type="password" class="form-control" id="password" name="password" {% if not admin %}required{% endif %}>
+          {% if admin %}
+          <small class="form-text text-muted">Leave blank to keep current password.</small>
+          {% endif %}
+        </div>
+        
+        <div class="mb-3 form-check">
+          <input type="checkbox" class="form-check-input" id="is_super_admin" name="is_super_admin" {% if admin and admin.is_super_admin %}checked{% endif %}>
+          <label class="form-check-label" for="is_super_admin">Super Admin</label>
+          <small class="form-text text-muted d-block">Super admins can manage other admin users and access all features.</small>
+        </div>
+        
+        <div class="mt-4">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> 
+            {% if admin %}Update{% else %}Create{% endif %} Admin User
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Focus on username field when page loads
+    document.getElementById('username').focus();
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      
+      if (!username) {
+        alert('Username is required');
+        event.preventDefault();
+        return;
+      }
+      
+      if (!email) {
+        alert('Email is required');
+        event.preventDefault();
+        return;
+      }
+      
+      {% if not admin %}
+      if (!password) {
+        alert('Password is required for new admin users');
+        event.preventDefault();
+        return;
+      }
+      {% endif %}
+    });
+  });
+</script>
+{% endblock %}
