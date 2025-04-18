@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Products - AvatarCommerce Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Influencer Products</h2>
+  <a href="{{ url_for('new_product') }}" class="btn btn-primary">
+    <i class="fas fa-plus me-2"></i> Add New Product
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Influencer</th>
+            <th>Product Name</th>
+            <th>Search Query</th>
+            <th>Default</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product, influencer_name in products %}
+          <tr>
+            <td>{{ influencer_name }}</td>
+            <td>{{ product.product_name }}</td>
+            <td>{{ product.product_query }}</td>
+            <td>
+              {% if product.is_default %}
+              <span class="badge bg-success">Default</span>
+              {% else %}
+              <a href="{{ url_for('set_default_product', id=product.id) }}" class="btn btn-sm btn-outline-secondary">
+                Set Default
+              </a>
+              {% endif %}
+            </td>
+            <td>{{ product.created_at.strftime('%Y-%m-%d') }}</td>
+            <td>
+              <div class="btn-group">
+                <a href="{{ url_for('edit_product', id=product.id) }}" class="btn btn-sm btn-outline-primary">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <button type="button" class="btn btn-sm btn-outline-danger" 
+                  data-bs-toggle="modal" data-bs-target="#deleteModal{{ product.id }}">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              
+              <!-- Delete Modal -->
+              <div class="modal fade" id="deleteModal{{ product.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Confirm Delete</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      Are you sure you want to delete the product "{{ product.product_name }}"?
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      <form action="{{ url_for('delete_product', id=product.id) }}" method="post">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="text-center">No products found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

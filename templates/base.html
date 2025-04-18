@@ -69,6 +69,41 @@
     .flash-messages {
       margin-bottom: 20px;
     }
+    .text-purple {
+    color: #8a2be2;
+    }
+    .bg-purple {
+      background-color: #8a2be2;
+    }
+    .avatar-preview {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #e9ecef;
+  }
+  .default-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 50px;
+    color: #adb5bd;
+  }
+  .upload-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .advanced-options {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+  }
   </style>
   {% block styles %}{% endblock %}
 </head>
@@ -93,6 +128,11 @@
         <li class="nav-item">
           <a class="nav-link {% if '/fans' in request.path %}active{% endif %}" href="{{ url_for('fans') }}">
             <i class="fas fa-users me-2"></i> <span class="nav-text">Fans</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if '/products' in request.path %}active{% endif %}" href="{{ url_for('products') }}">
+            <i class="fas fa-shopping-cart me-2"></i> <span class="nav-text">Products</span>
           </a>
         </li>
         <li class="nav-item">

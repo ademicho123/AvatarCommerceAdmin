@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Promotion Settings - AvatarCommerce Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Promotion Settings</h2>
+  <a href="{{ url_for('influencers') }}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left me-2"></i> Back to Influencers
+  </a>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header">
+    <h5 class="mb-0">Influencer: {{ influencer.username }}</h5>
+  </div>
+  <div class="card-body">
+    <form method="post">
+      <div class="mb-3">
+        <label for="promotion_frequency" class="form-label">Promotion Frequency</label>
+        <div class="input-group">
+          <input type="number" name="promotion_frequency" id="promotion_frequency" class="form-control" 
+            value="{{ settings.promotion_frequency if settings else 3 }}" min="1" required>
+          <span class="input-group-text">messages</span>
+        </div>
+        <div class="form-text">
+          How often to show product promotions (e.g., every 3 messages).
+        </div>
+      </div>
+      
+      <div class="mb-3 form-check">
+        <input type="checkbox" name="promote_at_end" id="promote_at_end" class="form-check-input" 
+          {% if settings and settings.promote_at_end %}checked{% endif %}>
+        <label for="promote_at_end" class="form-check-label">
+          Always promote at the end of every message
+        </label>
+        <div class="form-text">
+          If checked, product recommendations will be added to every message.
+        </div>
+      </div>
+      
+      <div class="mb-3">
+        <label for="default_product" class="form-label">Default Product</label>
+        <select name="default_product" id="default_product" class="form-select">
+          <option value="">No default product</option>
+          {% for product in products %}
+          <option value="{{ product.product_query }}" 
+            {% if settings and settings.default_product == product.product_query %}selected{% endif %}
+            {% if product.is_default %}selected{% endif %}>
+            {{ product.product_name }}
+          </option>
+          {% endfor %}
+        </select>
+        <div class="form-text">
+          The default product to promote when no specific product is mentioned.
+        </div>
+      </div>
+      
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <button type="submit" class="btn btn-primary">Save Settings</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h5 class="mb-0">Conversation Counters</h5>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Fan</th>
+            <th>Messages</th>
+            <th>Last Promotion</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for counter in counters %}
+          <tr>
+            <td>{{ counter.fan.username }}</td>
+            <td>{{ counter.message_count }}</td>
+            <td>
+              {% if counter.last_promotion_at %}
+              {{ counter.last_promotion_at.strftime('%Y-%m-%d %H:%M') }}
+              {% else %}
+              Never
+              {% endif %}
+            </td>
+            <td>
+              <form action="{{ url_for('reset_counter', id=counter.id) }}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-warning">
+                  <i class="fas fa-redo"></i> Reset
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="4" class="text-center">No conversation data yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

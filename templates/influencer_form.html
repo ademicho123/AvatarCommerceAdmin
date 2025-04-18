@@ -1,107 +1,228 @@
 {% extends "base.html" %}
 
 {% block title %}
-  {% if influencer %}Edit Influencer{% else %}New Influencer{% endif %} - AvatarCommerce Admin
+  {% if influencer %}
+    Edit Influencer - AvatarCommerce Admin
+  {% else %}
+    New Influencer - AvatarCommerce Admin
+  {% endif %}
 {% endblock %}
 
 {% block styles %}
 <style>
-  .form-container {
-    max-width: 800px;
+  .avatar-preview {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #e9ecef;
   }
-  .required-field::after {
-    content: " *";
-    color: red;
+  .default-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 50px;
+    color: #adb5bd;
+  }
+  .upload-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .advanced-options {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
   }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-  <h2>{% if influencer %}Edit Influencer{% else %}New Influencer{% endif %}</h2>
-  <a href="{{ url_for('influencers') }}" class="btn btn-secondary">
-    <i class="fas fa-arrow-left"></i> Back to Influencers
+  <h2>
+    {% if influencer %}
+      Edit Influencer
+    {% else %}
+      New Influencer
+    {% endif %}
+  </h2>
+  <a href="{{ url_for('influencers') }}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left me-2"></i> Back to Influencers
   </a>
 </div>
 
 <div class="card">
   <div class="card-body">
-    <div class="form-container">
-      <form method="POST">
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <label for="username" class="form-label required-field">Username</label>
-            <input type="text" class="form-control" id="username" name="username" value="{{ influencer.username if influencer else '' }}" required>
-          </div>
-          <div class="col-md-6">
-            <label for="email" class="form-label required-field">Email</label>
-            <input type="email" class="form-control" id="email" name="email" value="{{ influencer.email if influencer else '' }}" required>
-          </div>
-        </div>
-        
-        <div class="mb-3">
-          <label for="bio" class="form-label">Bio</label>
-          <textarea class="form-control" id="bio" name="bio" rows="3">{{ influencer.bio if influencer else '' }}</textarea>
-        </div>
-        
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <label for="heygen_avatar_id" class="form-label">HeyGen Avatar ID</label>
-            <input type="text" class="form-control" id="heygen_avatar_id" name="heygen_avatar_id" value="{{ influencer.heygen_avatar_id if influencer else '' }}">
-          </div>
-          <div class="col-md-6">
-            <label for="voice_id" class="form-label">Voice ID</label>
-            <input type="text" class="form-control" id="voice_id" name="voice_id" value="{{ influencer.voice_id if influencer else '' }}">
+    <form method="post" enctype="multipart/form-data">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="upload-container">
+            {% if influencer and influencer.original_asset_path %}
+              <img src="{{ url_for('static', filename=influencer.original_asset_path) }}" alt="Avatar Preview" class="avatar-preview mb-3">
+            {% else %}
+              <div class="default-avatar mb-3">
+                <i class="fas fa-user"></i>
+              </div>
+            {% endif %}
+            
+            <div class="mb-3">
+              <label for="avatar_file" class="form-label">Upload Avatar Image</label>
+              <input type="file" name="avatar_file" id="avatar_file" class="form-control" accept="image/*">
+            </div>
           </div>
         </div>
-        
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <label for="affiliate_id" class="form-label">Affiliate ID</label>
-            <input type="text" class="form-control" id="affiliate_id" name="affiliate_id" value="{{ influencer.affiliate_id if influencer else '' }}">
+        <div class="col-md-8">
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" name="username" id="username" class="form-control" 
+              value="{{ influencer.username if influencer else '' }}" required>
           </div>
-          <div class="col-md-6">
-            <label for="chat_page_url" class="form-label">Chat Page URL</label>
-            <input type="text" class="form-control" id="chat_page_url" name="chat_page_url" value="{{ influencer.chat_page_url if influencer else '' }}">
+          
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" name="email" id="email" class="form-control" 
+              value="{{ influencer.email if influencer else '' }}" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="password" class="form-label">
+              {% if influencer %}
+                New Password (leave blank to keep current password)
+              {% else %}
+                Password
+              {% endif %}
+            </label>
+            <input type="password" name="password" id="password" class="form-control" 
+              {% if not influencer %}required{% endif %}>
+          </div>
+          
+          <div class="mb-3">
+            <label for="bio" class="form-label">Bio</label>
+            <textarea name="bio" id="bio" class="form-control" rows="3">{{ influencer.bio if influencer else '' }}</textarea>
+          </div>
+          
+          <div class="mb-3">
+            <label for="affiliate_id" class="form-label">Default Affiliate ID</label>
+            <input type="text" name="affiliate_id" id="affiliate_id" class="form-control" 
+              value="{{ influencer.affiliate_id if influencer else '' }}" 
+              placeholder="e.g., amazon123">
+            <div class="form-text">
+              Used for product recommendations. You can add more affiliate IDs after creating the influencer.
+            </div>
+          </div>
+          
+          <div class="advanced-options">
+            <h5>Advanced Options</h5>
+            
+            <div class="mb-3">
+              <label for="heygen_avatar_id" class="form-label">HeyGen Avatar ID</label>
+              <input type="text" name="heygen_avatar_id" id="heygen_avatar_id" class="form-control" 
+                value="{{ influencer.heygen_avatar_id if influencer else '' }}">
+              <div class="form-text">
+                This will be automatically generated if an avatar image is uploaded.
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="voice_id" class="form-label">Voice ID</label>
+              <input type="text" name="voice_id" id="voice_id" class="form-control" 
+                value="{{ influencer.voice_id if influencer else '' }}">
+              <div class="form-text">
+                Optional. ElevenLabs voice ID for the chatbot.
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="chat_page_url" class="form-label">Chat Page URL</label>
+              <div class="input-group">
+                <span class="input-group-text">/chat/</span>
+                <input type="text" name="chat_page_url" id="chat_page_url" class="form-control" 
+                  value="{{ influencer.username if influencer else '' }}" readonly>
+              </div>
+              <div class="form-text">
+                Automatically generated based on username.
+              </div>
+            </div>
+          </div>
+          
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+            <a href="{{ url_for('influencers') }}" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">
+              {% if influencer %}
+                Update Influencer
+              {% else %}
+                Create Influencer
+              {% endif %}
+            </button>
           </div>
         </div>
-        
-        <div class="mt-4">
-          <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save"></i> 
-            {% if influencer %}Update{% else %}Create{% endif %} Influencer
-          </button>
-        </div>
-      </form>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% if influencer %}
+<!-- Additional action buttons for existing influencers -->
+<div class="row mt-4">
+  <div class="col-md-6 mb-3">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Promotion Settings</h5>
+        <p>Configure when and how products are promoted in chat responses.</p>
+        <a href="{{ url_for('promotion_settings', id=influencer.id) }}" class="btn btn-outline-primary">
+          <i class="fas fa-cog me-2"></i> Manage Promotion Settings
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6 mb-3">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Products</h5>
+        <p>Manage products that this influencer can promote.</p>
+        <a href="{{ url_for('products') }}" class="btn btn-outline-primary">
+          <i class="fas fa-shopping-cart me-2"></i> Manage Products
+        </a>
+      </div>
     </div>
   </div>
 </div>
+{% endif %}
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Focus on username field when page loads
-    document.getElementById('username').focus();
-    
-    // Form validation
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function(event) {
-      const username = document.getElementById('username').value.trim();
-      const email = document.getElementById('email').value.trim();
-      
-      if (!username) {
-        alert('Username is required');
-        event.preventDefault();
-        return;
-      }
-      
-      if (!email) {
-        alert('Email is required');
-        event.preventDefault();
-        return;
-      }
-    });
+  // Preview the avatar image before upload
+  document.getElementById('avatar_file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        // Get the preview element or create one if it doesn't exist
+        let preview = document.querySelector('.avatar-preview');
+        if (!preview) {
+          const defaultAvatar = document.querySelector('.default-avatar');
+          if (defaultAvatar) {
+            // Replace the default avatar with an image
+            preview = document.createElement('img');
+            preview.className = 'avatar-preview mb-3';
+            preview.alt = 'Avatar Preview';
+            defaultAvatar.parentNode.replaceChild(preview, defaultAvatar);
+          }
+        }
+        if (preview) {
+          preview.src = event.target.result;
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   });
 </script>
 {% endblock %}

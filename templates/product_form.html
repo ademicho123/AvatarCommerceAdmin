@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if product %}
+    Edit Product - AvatarCommerce Admin
+  {% else %}
+    New Product - AvatarCommerce Admin
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>
+    {% if product %}
+      Edit Product
+    {% else %}
+      New Product
+    {% endif %}
+  </h2>
+  <a href="{{ url_for('products') }}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left me-2"></i> Back to Products
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post">
+      <div class="mb-3">
+        <label for="influencer_id" class="form-label">Influencer</label>
+        <select name="influencer_id" id="influencer_id" class="form-select" required>
+          <option value="">Select an influencer</option>
+          {% for influencer in influencers %}
+          <option value="{{ influencer.id }}" {% if product and product.influencer_id == influencer.id %}selected{% endif %}>
+            {{ influencer.username }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div class="mb-3">
+        <label for="product_name" class="form-label">Product Name</label>
+        <input type="text" name="product_name" id="product_name" class="form-control" 
+          value="{{ product.product_name if product else '' }}" required>
+      </div>
+      
+      <div class="mb-3">
+        <label for="product_query" class="form-label">Search Query</label>
+        <input type="text" name="product_query" id="product_query" class="form-control" 
+          value="{{ product.product_query if product else '' }}" required>
+        <div class="form-text">
+          This is the search query that will be used to find products on Amazon.
+        </div>
+      </div>
+      
+      <div class="mb-3 form-check">
+        <input type="checkbox" name="is_default" id="is_default" class="form-check-input" 
+          {% if product and product.is_default %}checked{% endif %}>
+        <label for="is_default" class="form-check-label">
+          Set as default product for this influencer
+        </label>
+        <div class="form-text">
+          If checked, this product will be used when no specific product is mentioned in the conversation.
+        </div>
+      </div>
+      
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <a href="{{ url_for('products') }}" class="btn btn-outline-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+          {% if product %}
+            Update Product
+          {% else %}
+            Create Product
+          {% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

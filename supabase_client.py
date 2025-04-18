@@ -67,13 +67,33 @@ def sync_data_from_supabase(db, models):
             logger.info("Affiliate links synchronized successfully")
         except Exception as e:
             logger.error(f"Error syncing affiliate links: {str(e)}")
-        
+           
+        try:
+            sync_promotion_settings(db, supabase, models['promotion_settings'])
+            logger.info("Promotion settings synchronized successfully")
+
+        except Exception as e:
+            logger.error(f"Error syncing promotion settings: {str(e)}")
+
+        try:
+            sync_conversation_counters(db, supabase, models['conversation_counters'])
+            logger.info("Conversation counters synchronized successfully")
+        except Exception as e:
+            logger.error(f"Error syncing conversation counters: {str(e)}")
+
+        try:
+            sync_influencer_products(db, supabase, models['influencer_products'])
+            logger.info("Influencer products synchronized successfully")
+        except Exception as e:
+            logger.error(f"Error syncing influencer products: {str(e)}")
+
         logger.info("Supabase data synchronization completed")
         return True
+
     except Exception as e:
         logger.error(f"Error in Supabase synchronization: {str(e)}")
         return False
-
+    
 def sync_influencers(db, supabase, InfluencerModel):
     """Sync influencers from Supabase"""
     # Fetch influencers from Supabase
@@ -214,4 +234,108 @@ def sync_affiliate_links(db, supabase, AffiliateModel):
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error in sync_affiliate_links: {str(e)}")
+        raise
+
+def sync_promotion_settings(db, supabase, PromotionSettingsModel):
+    """Sync promotion settings from Supabase"""
+    try:
+        # Fetch promotion settings from Supabase
+        response = supabase.table('influencer_promotion_settings').select('*').execute()
+        settings_data = response.data
+        logger.info(f"Retrieved {len(settings_data)} promotion settings from Supabase")
+        
+        for item in settings_data:
+            # Check if settings already exist
+            existing = PromotionSettingsModel.query.filter_by(id=item.get('id')).first()
+            
+            if existing:
+                # Update existing settings
+                existing.promotion_frequency = item.get('promotion_frequency', existing.promotion_frequency)
+                existing.promote_at_end = item.get('promote_at_end', existing.promote_at_end)
+                existing.default_product = item.get('default_product')
+                existing.updated_at = datetime.utcnow()
+            else:
+                # Create new settings
+                new_settings = PromotionSettingsModel(
+                    id=item.get('id', str(uuid.uuid4())),
+                    influencer_id=item.get('influencer_id'),
+                    promotion_frequency=item.get('promotion_frequency', 3),
+                    promote_at_end=item.get('promote_at_end', False),
+                    default_product=item.get('default_product')
+                )
+                db.session.add(new_settings)
+        
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error in sync_promotion_settings: {str(e)}")
+        raise
+
+def sync_conversation_counters(db, supabase, ConversationCounterModel):
+    """Sync conversation counters from Supabase"""
+    try:
+        # Fetch conversation counters from Supabase
+        response = supabase.table('conversation_counters').select('*').execute()
+        counters_data = response.data
+        logger.info(f"Retrieved {len(counters_data)} conversation counters from Supabase")
+        
+        for item in counters_data:
+            # Check if counter already exists
+            existing = ConversationCounterModel.query.filter_by(id=item.get('id')).first()
+            
+            if existing:
+                # Update existing counter
+                existing.message_count = item.get('message_count', existing.message_count)
+                existing.last_promotion_at = item.get('last_promotion_at')
+                existing.updated_at = datetime.utcnow()
+            else:
+                # Create new counter
+                new_counter = ConversationCounterModel(
+                    id=item.get('id', str(uuid.uuid4())),
+                    influencer_id=item.get('influencer_id'),
+                    fan_id=item.get('fan_id'),
+                    message_count=item.get('message_count', 0),
+                    last_promotion_at=item.get('last_promotion_at')
+                )
+                db.session.add(new_counter)
+        
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error in sync_conversation_counters: {str(e)}")
+        raise
+
+def sync_influencer_products(db, supabase, InfluencerProductModel):
+    """Sync influencer products from Supabase"""
+    try:
+        # Fetch influencer products from Supabase
+        response = supabase.table('influencer_products').select('*').execute()
+        products_data = response.data
+        logger.info(f"Retrieved {len(products_data)} influencer products from Supabase")
+        
+        for item in products_data:
+            # Check if product already exists
+            existing = InfluencerProductModel.query.filter_by(id=item.get('id')).first()
+            
+            if existing:
+                # Update existing product
+                existing.product_name = item.get('product_name', existing.product_name)
+                existing.product_query = item.get('product_query', existing.product_query)
+                existing.is_default = item.get('is_default', existing.is_default)
+                existing.updated_at = datetime.utcnow()
+            else:
+                # Create new product
+                new_product = InfluencerProductModel(
+                    id=item.get('id', str(uuid.uuid4())),
+                    influencer_id=item.get('influencer_id'),
+                    product_name=item.get('product_name', 'Unnamed Product'),
+                    product_query=item.get('product_query', ''),
+                    is_default=item.get('is_default', False)
+                )
+                db.session.add(new_product)
+        
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error in sync_influencer_products: {str(e)}")
         raise

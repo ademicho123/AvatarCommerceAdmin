@@ -38,6 +38,10 @@ class InfluencerModel(db.Model):
     bio = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    promotion_settings = db.relationship('InfluencerPromotionSettingsModel', back_populates='influencer', uselist=False)
+    conversation_counters = db.relationship('ConversationCounterModel', back_populates='influencer', lazy='dynamic')
+    products = db.relationship('InfluencerProductModel', back_populates='influencer', lazy='dynamic')
+
     
     chat_interactions = db.relationship('ChatInteractionModel', back_populates='influencer', lazy='dynamic')
     affiliate_links = db.relationship('AffiliateModel', back_populates='influencer', lazy='dynamic')
@@ -55,6 +59,7 @@ class FanModel(db.Model):
     password_hash = db.Column(db.String(256), nullable=False, default='')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    conversation_counters = db.relationship('ConversationCounterModel', back_populates='fan', lazy='dynamic')
     
     chat_interactions = db.relationship('ChatInteractionModel', back_populates='fan', lazy='dynamic')
     
@@ -94,3 +99,55 @@ class AffiliateModel(db.Model):
     
     def __repr__(self):
         return f'<AffiliateLink {self.platform}:{self.affiliate_id}>'
+    
+class InfluencerPromotionSettingsModel(db.Model):
+    """Model for influencer promotion settings"""
+    __tablename__ = 'influencer_promotion_settings'
+    
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    influencer_id = db.Column(db.String(36), db.ForeignKey('influencers.id'), nullable=False)
+    promotion_frequency = db.Column(db.Integer, nullable=False, default=3)
+    promote_at_end = db.Column(db.Boolean, nullable=False, default=False)
+    default_product = db.Column(db.String(256), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    influencer = db.relationship('InfluencerModel', back_populates='promotion_settings')
+    
+    def __repr__(self):
+        return f'<PromotionSettings {self.id}>'
+
+class ConversationCounterModel(db.Model):
+    """Model for conversation counters between influencers and fans"""
+    __tablename__ = 'conversation_counters'
+    
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    influencer_id = db.Column(db.String(36), db.ForeignKey('influencers.id'), nullable=False)
+    fan_id = db.Column(db.String(36), db.ForeignKey('fans.id'), nullable=False)
+    message_count = db.Column(db.Integer, nullable=False, default=0)
+    last_promotion_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    influencer = db.relationship('InfluencerModel', back_populates='conversation_counters')
+    fan = db.relationship('FanModel', back_populates='conversation_counters')
+    
+    def __repr__(self):
+        return f'<ConversationCounter {self.influencer_id}:{self.fan_id}>'
+
+class InfluencerProductModel(db.Model):
+    """Model for influencer products to promote"""
+    __tablename__ = 'influencer_products'
+    
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    influencer_id = db.Column(db.String(36), db.ForeignKey('influencers.id'), nullable=False)
+    product_name = db.Column(db.String(256), nullable=False)
+    product_query = db.Column(db.String(256), nullable=False)
+    is_default = db.Column(db.Boolean, nullable=False, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    influencer = db.relationship('InfluencerModel', back_populates='products')
+    
+    def __repr__(self):
+        return f'<InfluencerProduct {self.product_name}>'
